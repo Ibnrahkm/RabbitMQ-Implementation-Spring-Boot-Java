@@ -5,6 +5,7 @@ import com.ibrahim.implementation.rabbitmq.db.DatabaseOperation;
 import com.ibrahim.implementation.rabbitmq.entites.User;
 import com.ibrahim.implementation.rabbitmq.response.Response;
 import com.ibrahim.implementation.rabbitmq.service.UserService;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
         try {
             user = databaseOperation.addUser(user);
             if (user.getId() > 0) {
-                rabbitMessagingTemplate.convertAndSend(queue.getActualName(), user.getEmail(), new Gson().toJson(user));
+                rabbitMessagingTemplate.convertAndSend(queue.getActualName(), queue.getActualName(), user);
                 response.setMessage("successful");
                 response.setData(user);
                 response.setStatus(true);
@@ -77,7 +78,8 @@ public class UserServiceImpl implements UserService {
         try {
             user = databaseOperation.updateUser(user);
             if (user.getId() > 0) {
-                rabbitMessagingTemplate.convertAndSend(queue.getActualName(), user.getEmail(), new Gson().toJson(user));
+                Message message = new Message(new Gson().toJson(user).getBytes("UTF-8"));
+                rabbitMessagingTemplate.send(queue.getActualName(), queue.getActualName(), message);
                 response.setMessage("successful");
                 response.setData(user);
                 response.setStatus(true);

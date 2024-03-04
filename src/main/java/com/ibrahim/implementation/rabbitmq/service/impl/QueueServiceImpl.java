@@ -26,11 +26,15 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public String createQueue(String name) {
         try {
+            // full custom queue preparation
             Connection connection = connectionFactory.createConnection();
             Channel channel = connection.createChannel(true);
-            AMQP.Queue.DeclareOk declareOk = channel.queueDeclare(name, true, false, false, null);
+            AMQP.Queue.DeclareOk declareOk = channel.queueDeclare(name, true, false, false, null);//queue name, durable,exclusive,auto delete
+            AMQP.Exchange.DeclareOk declareOk1 = channel.exchangeDeclare(name, "direct");// exchange name,type
+            AMQP.Exchange.BindOk ok = channel.exchangeBind(name, name, name); //destination,source,routing key
+            AMQP.Queue.BindOk ok1 = channel.queueBind(name, name, name);//queuename,exchangename,routing key
             channel.close();
-            BindingBuilder.bind(new Queue(name, true)).to(new DirectExchange(name, true, false)).with(name);
+            connection.close();
             return declareOk.getQueue();
         } catch (Exception e) {
             e.printStackTrace();
