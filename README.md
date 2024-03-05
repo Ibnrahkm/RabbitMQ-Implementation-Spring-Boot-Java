@@ -1,5 +1,12 @@
 # RabbitMQ-Implementation-Spring-Boot-Java
 
+start redis docker
+
+```
+sudo docker run --name redis -d -p 6379:6379 -e REDIS_PASSWORD=123456 redis sh -c 'exec redis-server --requirepass "$REDIS_PASSWORD"'
+
+```
+
 start rabbit MQ docker
 
 ```
